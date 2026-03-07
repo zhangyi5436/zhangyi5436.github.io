@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>三丽鸥消消乐</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #FFE6F2, #E6F7FF);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    .game-box {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 0 30px rgba(255,105,180,0.15);
+      max-width: 700px;
+      width: 100%;
+    }
+    .title {
+      text-align: center;
+      font-size: 28px;
+      color: #FF69B4;
+      margin-bottom: 10px;
+    }
+    .panel {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 15px;
+      background: #FFF0F5;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      font-weight: bold;
+      color: #FF69B4;
+    }
+    .board {
+      display: grid;
+      gap: 2px;
+      background: #E6F7FF;
+      padding: 6px;
+      border-radius: 10px;
+      margin: 0 auto;
+    }
+    .tile {
+      width: 55px;
+      height: 55px;
+      border-radius: 8px;
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+      position: relative;
+    }
+    .tile:hover {
+      transform: scale(1.05);
+    }
+    .tile.selected {
+      outline: 3px solid #FF69B4;
+    }
+    .tile.bomb {
+      animation: pop 0.45s ease forwards;
+    }
+    @keyframes pop {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.25); opacity: 0.9; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+    .menu {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .char-btn, .level-btn {
+      padding: 8px 12px;
+      margin: 4px;
+      border-radius: 10px;
+      border: none;
+      background: #FFE6F2;
+      color: #FF69B4;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .char-btn.active, .level-btn.active {
+      background: #FF69B4;
+      color: white;
+    }
+    .start-btn {
+      padding: 12px 30px;
+      background: #FF69B4;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .over {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+    .over-box {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      text-align: center;
+    }
+    .over h2 {
+      color: #FF69B4;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="game-box">
+  <h1 class="title">🎀 三丽鸥消消乐 🎀</h1>
+  <div class="panel">
+    <div>分数：<span id="score">0</span></div>
+    <div>步数：<span id="step">30</span></div>
+  </div>
+  <div id="board" class="board"></div>
+
+  <div class="menu">
+    <div>
+      <button class="char-btn active" data-char="1">美乐蒂</button>
+      <button class="char-btn" data-char="2">库洛米</button>
+      <button class="char-btn" data-char="3">玉桂狗</button>
+      <button class="char-btn" data-char="4">HelloKitty</button>
+      <button class="char-btn" data-char="5">帕恰狗</button>
+      <button class="char-btn" data-char="6">双子星</button>
+    </div>
+    <div style="margin-top:10px">
+      <button class="level-btn active" data-lv="1">简单</button>
+      <button class="level-btn" data-lv="2">中等</button>
+      <button class="level-btn" data-lv="3">困难</button>
+    </div>
+    <button class="start-btn" id="start">开始游戏</button>
+  </div>
+</div>
+
+<div class="over" id="over">
+  <div class="over-box">
+    <h2>游戏结束</h2>
+    <p>最终得分：<span id="final">0</span></p>
+    <button onclick="restart()">再来一局</button>
+  </div>
+</div>
+
+<script>
+const boardEl = document.getElementById('board');
+const scoreEl = document.getElementById('score');
+const stepEl = document.getElementById('step');
+const overEl = document.getElementById('over');
+const finalScoreEl = document.getElementById('final');
+
+// 消除音效
+const popSound = new Audio("https://assets.mixkit.co/sfx/mp3/mixkit-software-interface-start-2574.mp3");
+
+let size = 8;
+let step = 30;
+let score = 0;
+let grid = [];
+let selected = null;
+
+const icons = {
+  1: "https://c-ssl.dtstatic.com/uploads/blog/202307/15/oVSp300bsgAe6jm.thumb.1000_0.jpg",
+  2: "https://c-ssl.dtstatic.com/uploads/blog/202403/05/4ESVo2mpSoMVvEV.thumb.1000_0.jpg",
+  3: "https://c-ssl.dtstatic.com/uploads/blog/202404/21/vDSWWYA0UdXG58Z.thumb.1000_0.jpeg ",
+  4: "https://p0.meituan.net/imgupload/d5dde7f3ae32d23baa9ad4fc1c5c123029938.webp",
+  5: "https://miaobi-lite.cdn.bcebos.com/miaobi/5mao/b%275biV5oGw54uX5Yqo5Zu%2BXzE3Mjk1NjA3OTkuMzg1NDcwNg%3D%3D%27/0.png",
+  6: "https://c-ssl.dtstatic.com/uploads/blog/202212/06/20221206215638_882e0.thumb.1000_0.jpg"
+};
+
+document.querySelectorAll('.char-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.char-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.level-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.level-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    const lv = parseInt(b.dataset.lv);
+    if (lv === 1) { size = 8; step = 35; }
+    if (lv === 2) { size = 9; step = 30; }
+    if (lv === 3) { size = 10; step = 25; }
+  });
+});
+
+document.getElementById('start').addEventListener('click', start);
+
+function start() {
+  grid = [];
+  for (let y = 0; y < size; y++) {
+    const row = [];
+    for (let x = 0; x < size; x++) {
+      row.push(Math.floor(Math.random() * 5) + 1);
+    }
+    grid.push(row);
+  }
+  score = 0;
+  stepEl.textContent = step;
+  scoreEl.textContent = score;
+  render();
+}
+
+function render() {
+  boardEl.innerHTML = '';
+  boardEl.style.gridTemplateColumns = `repeat(${size},55px)`;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const t = document.createElement('div');
+      t.classList.add('tile');
+      t.style.backgroundImage = `url(${icons[grid[y][x]]})`;
+      t.dataset.x = x;
+      t.dataset.y = y;
+      t.onclick = () => click(x, y);
+      boardEl.appendChild(t);
+    }
+  }
+}
+
+function click(x, y) {
+  if (!selected) {
+    selected = { x, y };
+    mark(x, y, true);
+    return;
+  }
+  const sx = selected.x, sy = selected.y;
+  if (Math.abs(x - sx) + Math.abs(y - sy) !== 1) {
+    mark(sx, sy, false);
+    selected = { x, y };
+    mark(x, y, true);
+    return;
+  }
+  mark(sx, sy, false);
+  swap(sx, sy, x, y);
+  selected = null;
+}
+
+function mark(x, y, yes) {
+  const t = boardEl.children[y * size + x];
+  if (yes) t.classList.add('selected');
+  else t.classList.remove('selected');
+}
+
+function swap(x1, y1, x2, y2) {
+  [grid[y1][x1], grid[y2][x2]] = [grid[y2][x2], grid[y1][x1]];
+  const matches = check();
+  if (matches.length === 0) {
+    [grid[y1][x1], grid[y2][x2]] = [grid[y2][x2], grid[y1][x1]];
+    return;
+  }
+  step--;
+  stepEl.textContent = step;
+  remove(matches);
+}
+
+function check() {
+  const res = new Set();
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size - 2; x++) {
+      const v = grid[y][x];
+      if (v && v === grid[y][x+1] && v === grid[y][x+2]) {
+        res.add(`${x},${y}`); res.add(`${x+1},${y}`); res.add(`${x+2},${y}`);
+      }
+    }
+  }
+  for (let x = 0; x < size; x++) {
+    for (let y = 0; y < size - 2; y++) {
+      const v = grid[y][x];
+      if (v && v === grid[y+1][x] && v === grid[y+2][x]) {
+        res.add(`${x},${y}`); res.add(`${x},${y+1}`); res.add(`${x},${y+2}`);
+      }
+    }
+  }
+  return Array.from(res).map(s => s.split(',').map(Number));
+}
+
+function remove(matches) {
+  try { popSound.cloneNode().play(); } catch (e) {}
+  
+  matches.forEach(([x, y]) => {
+    const i = y * size + x;
+    boardEl.children[i].classList.add('bomb');
+  });
+
+  setTimeout(() => {
+    matches.forEach(([x, y]) => grid[y][x] = null);
+    score += matches.length * 10;
+    scoreEl.textContent = score;
+    fallAndRefill();
+  }, 450);
+}
+
+// 下落 + 顶部自动补新方块（你要的功能）
+function fallAndRefill() {
+  for (let x = 0; x < size; x++) {
+    const col = [];
+    for (let y = 0; y < size; y++) {
+      if (grid[y][x] !== null) col.push(grid[y][x]);
+    }
+    for (let y = 0; y < size; y++) {
+      grid[y][x] = y >= size - col.length ? col[y - (size - col.length)] : null;
+    }
+  }
+
+  // 顶部补新
+  for (let x = 0; x < size; x++) {
+    for (let y = 0; y < size; y++) {
+      if (grid[y][x] === null) {
+        grid[y][x] = Math.floor(Math.random() * 5) + 1;
+      }
+    }
+  }
+
+  render();
+
+  setTimeout(() => {
+    const m = check();
+    if (m.length > 0) {
+      remove(m);
+    } else {
+      if (step <= 0) {
+        finalScoreEl.textContent = score;
+        overEl.style.display = 'flex';
+      }
+    }
+  }, 300);
+}
+
+function restart() {
+  overEl.style.display = 'none';
+  start();
+}
+</script>
+</body>
+</html>
