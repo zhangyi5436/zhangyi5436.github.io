@@ -1,353 +1,450 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>三丽鸥消消乐</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "Microsoft YaHei", sans-serif;
-    }
-    body {
-      background: linear-gradient(135deg, #FFE6F2, #E6F7FF);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-    }
-    .game-box {
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 0 30px rgba(255,105,180,0.15);
-      max-width: 700px;
-      width: 100%;
-    }
-    .title {
-      text-align: center;
-      font-size: 28px;
-      color: #FF69B4;
-      margin-bottom: 10px;
-    }
-    .panel {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 15px;
-      background: #FFF0F5;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      font-weight: bold;
-      color: #FF69B4;
-    }
-    .board {
-      display: grid;
-      gap: 2px;
-      background: #E6F7FF;
-      padding: 6px;
-      border-radius: 10px;
-      margin: 0 auto;
-    }
-    .tile {
-      width: 55px;
-      height: 55px;
-      border-radius: 8px;
-      background-size: cover;
-      background-position: center;
-      cursor: pointer;
-      transition: transform 0.2s;
-      position: relative;
-    }
-    .tile:hover {
-      transform: scale(1.05);
-    }
-    .tile.selected {
-      outline: 3px solid #FF69B4;
-    }
-    .tile.bomb {
-      animation: pop 0.45s ease forwards;
-    }
-    @keyframes pop {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.25); opacity: 0.9; }
-      100% { transform: scale(0); opacity: 0; }
-    }
-    .menu {
-      text-align: center;
-      margin-top: 20px;
-    }
-    .char-btn, .level-btn {
-      padding: 8px 12px;
-      margin: 4px;
-      border-radius: 10px;
-      border: none;
-      background: #FFE6F2;
-      color: #FF69B4;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .char-btn.active, .level-btn.active {
-      background: #FF69B4;
-      color: white;
-    }
-    .start-btn {
-      padding: 12px 30px;
-      background: #FF69B4;
-      color: white;
-      border: none;
-      border-radius: 30px;
-      font-size: 16px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-    .over {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-    }
-    .over-box {
-      background: white;
-      padding: 30px;
-      border-radius: 16px;
-      text-align: center;
-    }
-    .over h2 {
-      color: #FF69B4;
-      margin-bottom: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>三丽鸥消消乐</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #FFE6F2, #E6F3FF);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .game-container {
+            background: #fff;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .score-box {
+            font-size: 16px;
+            font-weight: bold;
+            color: #FF69B4;
+            background: #FFF0F7;
+            padding: 6px 12px;
+            border-radius: 50px;
+        }
+
+        .game-title {
+            font-size: 20px;
+            color: #FF69B4;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-gap: 6px;
+            background: #F8F9FA;
+            padding: 10px;
+            border-radius: 15px;
+            width: 100%;
+        }
+
+        .grid-cell {
+            aspect-ratio: 1/1;
+            border-radius: 12px;
+            background: #FFF0F7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 新增：选中格子的高亮样式 */
+        .grid-cell.selected {
+            transform: scale(1.1);
+            border: 3px solid #FF1493;
+            box-shadow: 0 0 15px rgba(255, 20, 147, 0.6);
+            background: #FFEFF7;
+        }
+
+        .character {
+            width: 85%;
+            height: 85%;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            object-fit: cover;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        @keyframes eliminate {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; filter: brightness(1.5); }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .eliminate {
+            animation: eliminate 0.5s ease forwards;
+        }
+
+        @keyframes appear {
+            0% { transform: translateY(-50px); opacity: 0; scale: 0.5; }
+            70% { transform: translateY(10px); opacity: 1; scale: 1.1; }
+            100% { transform: translateY(0); scale: 1; }
+        }
+
+        .appear {
+            animation: appear 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes swap {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .swap {
+            animation: swap 0.3s ease forwards;
+        }
+
+        @keyframes scorePopup {
+            0% { transform: translateY(0); opacity: 1; font-size: 14px; }
+            100% { transform: translateY(-30px); opacity: 0; font-size: 16px; }
+        }
+
+        .score-popup {
+            position: absolute;
+            color: #FF1493;
+            font-weight: bold;
+            pointer-events: none;
+            animation: scorePopup 0.8s ease forwards;
+            z-index: 100;
+        }
+
+        .game-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .game-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .overlay-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .game-result {
+            font-size: 24px;
+            color: #FF69B4;
+            margin-bottom: 15px;
+        }
+
+        .final-score {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #FF69B4, #FF1493);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 16px;
+            border-radius: 50px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-
-<div class="game-box">
-  <h1 class="title">🎀 三丽鸥消消乐 🎀</h1>
-  <div class="panel">
-    <div>分数：<span id="score">0</span></div>
-    <div>步数：<span id="step">30</span></div>
-  </div>
-  <div id="board" class="board"></div>
-
-  <div class="menu">
-    <div>
-      <button class="char-btn active" data-char="1">美乐蒂</button>
-      <button class="char-btn" data-char="2">库洛米</button>
-      <button class="char-btn" data-char="3">玉桂狗</button>
-      <button class="char-btn" data-char="4">HelloKitty</button>
-      <button class="char-btn" data-char="5">帕恰狗</button>
-      <button class="char-btn" data-char="6">双子星</button>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="score-box">分数: <span id="score">0</span></div>
+            <h1 class="game-title">三丽鸥消消乐</h1>
+        </div>
+        
+        <div class="game-grid" id="gameGrid"></div>
+        
+        <div class="game-overlay" id="gameOverlay">
+            <div class="overlay-content">
+                <div class="game-result" id="gameResult">游戏胜利！</div>
+                <div class="final-score">最终得分: <span id="finalScore">0</span></div>
+                <button class="restart-btn" id="restartBtn">再来一局</button>
+            </div>
+        </div>
     </div>
-    <div style="margin-top:10px">
-      <button class="level-btn active" data-lv="1">简单</button>
-      <button class="level-btn" data-lv="2">中等</button>
-      <button class="level-btn" data-lv="3">困难</button>
-    </div>
-    <button class="start-btn" id="start">开始游戏</button>
-  </div>
-</div>
 
-<div class="over" id="over">
-  <div class="over-box">
-    <h2>游戏结束</h2>
-    <p>最终得分：<span id="final">0</span></p>
-    <button onclick="restart()">再来一局</button>
-  </div>
-</div>
+    <script>
+        const characters = [
+           { name: 'hello kitty', src: 'https://c-ssl.dtstatic.com/uploads/blog/202307/15/oVSp300bsgAe6jm.thumb.1000_0.jpg' }, // 占位图1
+            { name: 'melody', src: 'https://c-ssl.dtstatic.com/uploads/blog/202403/05/4ESVo2mpSoMVvEV.thumb.1000_0.jpg' },     // 占位图2
+            { name: 'kuromi', src: 'https://c-ssl.dtstatic.com/uploads/blog/202404/21/vDSWWYA0UdXG58Z.thumb.1000_0.jpeg' },     // 占位图3
+            { name: 'pompompurin', src: 'https://p0.meituan.net/imgupload/d5dde7f3ae32d23baa9ad4fc1c5c123029938.webp' },// 占位图4
+            { name: 'cinnamoroll', src: 'https://miaobi-lite.cdn.bcebos.com/miaobi/5mao/b%275biV5oGw54uX5Yqo5Zu%2BXzE3Mjk1NjA3OTkuMzg1NDcwNg%3D%3D%27/0.png' },// 占位图5
+            { name: 'pochacco', src: 'https://c-ssl.dtstatic.com/uploads/blog/202212/06/20221206215638_882e0.thumb.1000_0.jpg' }     // 占位图6
+        ];
 
-<script>
-const boardEl = document.getElementById('board');
-const scoreEl = document.getElementById('score');
-const stepEl = document.getElementById('step');
-const overEl = document.getElementById('over');
-const finalScoreEl = document.getElementById('final');
+        const config = { rows:6, cols:6, minMatch:3, baseScore:10 };
+        let gameState = { grid:[], score:0, selectedCell:null, isAnimating:false, gameOver:false };
 
-// 消除音效
-const popSound = new Audio("https://assets.mixkit.co/sfx/mp3/mixkit-software-interface-start-2574.mp3");
+        const gameGrid = document.getElementById('gameGrid');
+        const scoreElement = document.getElementById('score');
+        const gameOverlay = document.getElementById('gameOverlay');
+        const gameResult = document.getElementById('gameResult');
+        const finalScore = document.getElementById('finalScore');
+        const restartBtn = document.getElementById('restartBtn');
 
-let size = 8;
-let step = 30;
-let score = 0;
-let grid = [];
-let selected = null;
+        function initGame() {
+            gameState.grid = [];
+            gameState.score = 0;
+            gameState.selectedCell = null;
+            gameState.isAnimating = false;
+            gameState.gameOver = false;
+            scoreElement.textContent = '0';
+            gameOverlay.classList.remove('active');
+            gameGrid.innerHTML = '';
 
-const icons = {
-  1: "https://c-ssl.dtstatic.com/uploads/blog/202307/15/oVSp300bsgAe6jm.thumb.1000_0.jpg",
-  2: "https://c-ssl.dtstatic.com/uploads/blog/202403/05/4ESVo2mpSoMVvEV.thumb.1000_0.jpg",
-  3: "https://c-ssl.dtstatic.com/uploads/blog/202404/21/vDSWWYA0UdXG58Z.thumb.1000_0.jpeg ",
-  4: "https://p0.meituan.net/imgupload/d5dde7f3ae32d23baa9ad4fc1c5c123029938.webp",
-  5: "https://miaobi-lite.cdn.bcebos.com/miaobi/5mao/b%275biV5oGw54uX5Yqo5Zu%2BXzE3Mjk1NjA3OTkuMzg1NDcwNg%3D%3D%27/0.png",
-  6: "https://c-ssl.dtstatic.com/uploads/blog/202212/06/20221206215638_882e0.thumb.1000_0.jpg"
-};
+            for(let row=0;row<config.rows;row++){
+                gameState.grid[row] = [];
+                for(let col=0;col<config.cols;col++){
+                    const c = characters[Math.floor(Math.random()*characters.length)];
+                    const el = createCell(row,col,c);
+                    gameState.grid[row][col] = {character:c,row,col,element:el};
+                    gameGrid.appendChild(el);
+                }
+            }
 
-document.querySelectorAll('.char-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.char-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-  });
-});
+            while(checkAllMatches().length>0) regenerateGrid();
+        }
 
-document.querySelectorAll('.level-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.level-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    const lv = parseInt(b.dataset.lv);
-    if (lv === 1) { size = 8; step = 35; }
-    if (lv === 2) { size = 9; step = 30; }
-    if (lv === 3) { size = 10; step = 25; }
-  });
-});
+        function createCell(row,col,c){
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            const img = document.createElement('img');
+            img.className = 'character appear';
+            img.src = c.src;
+            cell.appendChild(img);
+            cell.onclick = ()=>handleCellClick(row,col);
+            return cell;
+        }
 
-document.getElementById('start').addEventListener('click', start);
+        function handleCellClick(r,c){
+            if(gameState.isAnimating||gameState.gameOver) return;
+            const cell = gameState.grid[r][c];
+            
+            // 清除上一个选中格子的样式
+            if(gameState.selectedCell) {
+                gameState.selectedCell.element.classList.remove('selected');
+            }
 
-function start() {
-  grid = [];
-  for (let y = 0; y < size; y++) {
-    const row = [];
-    for (let x = 0; x < size; x++) {
-      row.push(Math.floor(Math.random() * 5) + 1);
-    }
-    grid.push(row);
-  }
-  score = 0;
-  stepEl.textContent = step;
-  scoreEl.textContent = score;
-  render();
-}
+            // 第一次点击
+            if(!gameState.selectedCell){
+                gameState.selectedCell = cell;
+                cell.element.classList.add('selected'); // 添加选中样式
+                return;
+            }
 
-function render() {
-  boardEl.innerHTML = '';
-  boardEl.style.gridTemplateColumns = `repeat(${size},55px)`;
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const t = document.createElement('div');
-      t.classList.add('tile');
-      t.style.backgroundImage = `url(${icons[grid[y][x]]})`;
-      t.dataset.x = x;
-      t.dataset.y = y;
-      t.onclick = () => click(x, y);
-      boardEl.appendChild(t);
-    }
-  }
-}
+            // 点击同一个单元格
+            if(gameState.selectedCell.row===r&&gameState.selectedCell.col===c){
+                cell.element.classList.remove('selected'); // 移除选中样式
+                gameState.selectedCell = null;
+                return;
+            }
 
-function click(x, y) {
-  if (!selected) {
-    selected = { x, y };
-    mark(x, y, true);
-    return;
-  }
-  const sx = selected.x, sy = selected.y;
-  if (Math.abs(x - sx) + Math.abs(y - sy) !== 1) {
-    mark(sx, sy, false);
-    selected = { x, y };
-    mark(x, y, true);
-    return;
-  }
-  mark(sx, sy, false);
-  swap(sx, sy, x, y);
-  selected = null;
-}
+            // 检查是否相邻
+            if(!isAdjacent(gameState.selectedCell,cell)){
+                gameState.selectedCell = cell;
+                cell.element.classList.add('selected'); // 切换选中样式到新格子
+                return;
+            }
 
-function mark(x, y, yes) {
-  const t = boardEl.children[y * size + x];
-  if (yes) t.classList.add('selected');
-  else t.classList.remove('selected');
-}
+            // 交换元素
+            swap(gameState.selectedCell,cell);
+        }
 
-function swap(x1, y1, x2, y2) {
-  [grid[y1][x1], grid[y2][x2]] = [grid[y2][x2], grid[y1][x1]];
-  const matches = check();
-  if (matches.length === 0) {
-    [grid[y1][x1], grid[y2][x2]] = [grid[y2][x2], grid[y1][x1]];
-    return;
-  }
-  step--;
-  stepEl.textContent = step;
-  remove(matches);
-}
+        function isAdjacent(a,b){
+            const dr=Math.abs(a.row-b.row),dc=Math.abs(a.col-b.col);
+            return (dr===1&&dc===0)||(dr===0&&dc===1);
+        }
 
-function check() {
-  const res = new Set();
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size - 2; x++) {
-      const v = grid[y][x];
-      if (v && v === grid[y][x+1] && v === grid[y][x+2]) {
-        res.add(`${x},${y}`); res.add(`${x+1},${y}`); res.add(`${x+2},${y}`);
-      }
-    }
-  }
-  for (let x = 0; x < size; x++) {
-    for (let y = 0; y < size - 2; y++) {
-      const v = grid[y][x];
-      if (v && v === grid[y+1][x] && v === grid[y+2][x]) {
-        res.add(`${x},${y}`); res.add(`${x},${y+1}`); res.add(`${x},${y+2}`);
-      }
-    }
-  }
-  return Array.from(res).map(s => s.split(',').map(Number));
-}
+        function swap(a,b){
+            gameState.isAnimating = true;
+            // 清除选中样式
+            a.element.classList.remove('selected');
+            
+            const ia = a.element.querySelector('img'), ib=b.element.querySelector('img');
+            const t = ia.src; ia.src=ib.src; ib.src=t;
+            ia.classList.add('swap'); ib.classList.add('swap');
+            const tc=a.character; a.character=b.character; b.character=tc;
+            gameState.selectedCell=null;
+            
+            setTimeout(()=>{
+                ia.classList.remove('swap'); ib.classList.remove('swap');
+                const m=checkAllMatches();
+                if(m.length>0) eliminateMatches(m);
+                else setTimeout(()=>{
+                    const t=ia.src; ia.src=ib.src; ib.src=t;
+                    const tc=a.character; a.character=b.character; b.character=tc;
+                    gameState.isAnimating=false;
+                },300);
+            },300);
+        }
 
-function remove(matches) {
-  try { popSound.cloneNode().play(); } catch (e) {}
-  
-  matches.forEach(([x, y]) => {
-    const i = y * size + x;
-    boardEl.children[i].classList.add('bomb');
-  });
+        function checkAllMatches(){
+            const m=[];
+            for(let r=0;r<config.rows;r++){
+                for(let c=0;c<=config.cols-config.minMatch;c++){
+                    const g=[gameState.grid[r][c]];
+                    for(let i=1;i<config.minMatch;i++) if(gameState.grid[r][c+i].character.name===g[0].character.name) g.push(gameState.grid[r][c+i]); else break;
+                    if(g.length>=config.minMatch) m.push(g),c+=g.length-1;
+                }
+            }
+            for(let c=0;c<config.cols;c++){
+                for(let r=0;r<=config.rows-config.minMatch;r++){
+                    const g=[gameState.grid[r][c]];
+                    for(let i=1;i<config.minMatch;i++) if(gameState.grid[r+i][c].character.name===g[0].character.name) g.push(gameState.grid[r+i][c]); else break;
+                    if(g.length>=config.minMatch) m.push(g),r+=g.length-1;
+                }
+            }
+            return m;
+        }
 
-  setTimeout(() => {
-    matches.forEach(([x, y]) => grid[y][x] = null);
-    score += matches.length * 10;
-    scoreEl.textContent = score;
-    fallAndRefill();
-  }, 450);
-}
+        function eliminateMatches(matches){
+            matches.forEach(g=>g.forEach(cell=>{
+                cell.element.querySelector('img').classList.add('eliminate');
+                addScore(cell.row,cell.col,g.length);
+            }));
+            gameState.score += matches.flat().length*config.baseScore;
+            scoreElement.textContent=gameState.score;
+            setTimeout(()=>{
+                fill();
+                setTimeout(()=>{
+                    const nm=checkAllMatches();
+                    if(nm.length>0) eliminateMatches(nm);
+                    else { if(!hasMove()) end(); gameState.isAnimating=false; }
+                },500);
+            },500);
+        }
 
-// 下落 + 顶部自动补新方块（你要的功能）
-function fallAndRefill() {
-  for (let x = 0; x < size; x++) {
-    const col = [];
-    for (let y = 0; y < size; y++) {
-      if (grid[y][x] !== null) col.push(grid[y][x]);
-    }
-    for (let y = 0; y < size; y++) {
-      grid[y][x] = y >= size - col.length ? col[y - (size - col.length)] : null;
-    }
-  }
+        function addScore(r,c,n){
+            const p=document.createElement('div');
+            p.className='score-popup';
+            p.textContent=`+${n*config.baseScore}`;
+            const rect=gameState.grid[r][c].element.getBoundingClientRect();
+            const g=gameGrid.getBoundingClientRect();
+            p.style.left=rect.left-g.left+rect.width/2+'px';
+            p.style.top=rect.top-g.top+rect.height/2+'px';
+            gameGrid.appendChild(p);
+            setTimeout(()=>p.remove(),800);
+        }
 
-  // 顶部补新
-  for (let x = 0; x < size; x++) {
-    for (let y = 0; y < size; y++) {
-      if (grid[y][x] === null) {
-        grid[y][x] = Math.floor(Math.random() * 5) + 1;
-      }
-    }
-  }
+        function fill(){
+            for(let c=0;c<config.cols;c++){
+                const non=[];
+                for(let r=0;r<config.rows;r++) if(!gameState.grid[r][c].element.querySelector('img').classList.contains('eliminate')) non.push(gameState.grid[r][c]);
+                for(let r=0;r<config.rows;r++){
+                    const cell=gameState.grid[r][c];
+                    const img=cell.element.querySelector('img');
+                    if(r<config.rows-non.length){
+                        cell.character=characters[Math.floor(Math.random()*characters.length)];
+                        img.src=cell.character.src;
+                        img.classList.remove('eliminate');
+                        img.classList.add('appear');
+                        setTimeout(()=>img.classList.remove('appear'),600);
+                    }else{
+                        const t=non[r-(config.rows-non.length)];
+                        cell.character=t.character;
+                        img.src=t.character.src;
+                        img.classList.remove('eliminate');
+                    }
+                }
+            }
+        }
 
-  render();
+        function hasMove(){
+            for(let r=0;r<config.rows;r++){
+                for(let c=0;c<config.cols;c++){
+                    if(c<config.cols-1){
+                        const t=gameState.grid[r][c].character;
+                        gameState.grid[r][c].character=gameState.grid[r][c+1].character;
+                        gameState.grid[r][c+1].character=t;
+                        if(checkAllMatches().length>0){
+                            gameState.grid[r][c+1].character=gameState.grid[r][c].character;
+                            gameState.grid[r][c].character=t;
+                            return true;
+                        }
+                        gameState.grid[r][c+1].character=gameState.grid[r][c].character;
+                        gameState.grid[r][c].character=t;
+                    }
+                    if(r<config.rows-1){
+                        const t=gameState.grid[r][c].character;
+                        gameState.grid[r][c].character=gameState.grid[r+1][c].character;
+                        gameState.grid[r+1][c].character=t;
+                        if(checkAllMatches().length>0){
+                            gameState.grid[r+1][c].character=gameState.grid[r][c].character;
+                            gameState.grid[r][c].character=t;
+                            return true;
+                        }
+                        gameState.grid[r+1][c].character=gameState.grid[r][c].character;
+                        gameState.grid[r][c].character=t;
+                    }
+                }
+            }
+            return false;
+        }
 
-  setTimeout(() => {
-    const m = check();
-    if (m.length > 0) {
-      remove(m);
-    } else {
-      if (step <= 0) {
-        finalScoreEl.textContent = score;
-        overEl.style.display = 'flex';
-      }
-    }
-  }, 300);
-}
+        function regenerateGrid(){
+            for(let r=0;r<config.rows;r++) for(let c=0;c<config.cols;c++){
+                gameState.grid[r][c].character=characters[Math.floor(Math.random()*characters.length)];
+                gameState.grid[r][c].element.querySelector('img').src=gameState.grid[r][c].character.src;
+            }
+        }
 
-function restart() {
-  overEl.style.display = 'none';
-  start();
-}
-</script>
+        function end(){
+            gameState.gameOver=true;
+            gameResult.textContent=gameState.score>=500?'游戏胜利！':'游戏结束';
+            finalScore.textContent=gameState.score;
+            gameOverlay.classList.add('active');
+        }
+
+        restartBtn.onclick=initGame;
+        window.onload=initGame;
+    </script>
 </body>
 </html>
