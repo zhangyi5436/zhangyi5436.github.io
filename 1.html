@@ -13,7 +13,6 @@
       user-select: none;
       -webkit-touch-callout: none;
     }
-
     body {
       font-family: "Microsoft YaHei", sans-serif;
       background: #fdf6f8;
@@ -23,7 +22,6 @@
       align-items: center;
       height: 100vh;
     }
-
     .game-container {
       width: 100vw;
       height: 100vh;
@@ -32,8 +30,6 @@
       position: relative;
       overflow: hidden;
     }
-
-    /* 首页 */
     .home {
       width: 100%;
       height: 100%;
@@ -44,14 +40,12 @@
       gap: 20px;
       padding: 20px;
     }
-
     .title {
       font-size: 32px;
       color: #ff69b4;
       font-weight: bold;
       text-shadow: 0 0 10px #fff;
     }
-
     .btn {
       padding: 14px 30px;
       background: #ff8fc6;
@@ -61,21 +55,17 @@
       border: none;
       box-shadow: 0 4px 10px #0001;
     }
-
     .tip {
       font-size: 12px;
       color: #666;
       margin-top: 10px;
     }
-
-    /* 游戏场景 */
     .game {
       width: 100%;
       height: 100%;
       display: none;
       position: relative;
     }
-
     .ground {
       position: absolute;
       bottom: 0;
@@ -85,19 +75,17 @@
       border-top-left-radius: 50% 20px;
       border-top-right-radius: 50% 20px;
     }
-
     .stage {
       position: absolute;
       bottom: 35%;
       width: 100%;
-      height: 200px;
+      height: 220px;
       display: flex;
       justify-content: center;
       gap: 12px;
       flex-wrap: wrap;
       padding: 0 20px;
     }
-
     .prize {
       width: 40px;
       height: 50px;
@@ -110,8 +98,6 @@
       text-align: center;
       box-shadow: 0 2px 5px #0002;
     }
-
-    /* 套圈 */
     .ring {
       width: 50px;
       height: 50px;
@@ -124,21 +110,17 @@
       transition: none;
       z-index: 99;
     }
-
-    /* 瞄准线 */
     .aim-line {
       position: absolute;
       bottom: 120px;
       left: 50%;
       width: 2px;
-      height: 220px;
+      height: 280px;
       background: #ff69b466;
       transform-origin: bottom center;
       pointer-events: none;
       display: none;
     }
-
-    /* 收藏页 */
     .collection {
       position: absolute;
       top: 0;
@@ -150,14 +132,12 @@
       display: none;
       overflow-y: auto;
     }
-
     .collect-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
       margin-top: 20px;
     }
-
     .item {
       aspect-ratio: 1/1;
       background: #f4f4f4;
@@ -167,14 +147,11 @@
       justify-content: center;
       font-size: 12px;
     }
-
     .item.active {
       background: #ffdae0;
       color: #c44;
       font-weight: bold;
     }
-
-    /* 浮动按钮 */
     .float-btn {
       position: absolute;
       z-index: 999;
@@ -185,225 +162,219 @@
       font-size: 12px;
       border: none;
     }
-
-    .back-btn {
-      top: 40px;
-      left: 20px;
-    }
-
-    .reset-btn {
-      bottom: 120px;
-      right: 20px;
-    }
-
-    .mode-btn {
-      top: 40px;
-      right: 20px;
-    }
-
-    .share-btn {
-      top: 90px;
-      right: 20px;
-    }
-
-    .collect-btn {
-      top: 140px;
-      right: 20px;
-    }
+    .back-btn { top: 40px; left: 20px; }
+    .reset-btn { bottom: 120px; right: 20px; }
+    .mode-btn { top: 40px; right: 20px; }
+    .share-btn { top: 90px; right: 20px; }
+    .collect-btn { top: 140px; right: 20px; }
   </style>
 </head>
-
 <body>
-  <div class="game-container">
-    <!-- 首页 -->
-    <div class="home" id="home">
-      <div class="title">快乐套圈圈</div>
-      <button class="btn" onclick="startGame()">开始游戏</button>
-      <div class="tip">滑动控方向 · 向后拉力度 · 松手投掷</div>
-      <div class="tip">无广告 · 无限次 · 全家一起玩</div>
-    </div>
 
-    <!-- 游戏页 -->
-    <div class="game" id="game">
-      <div class="ground"></div>
-      <div class="stage" id="stage"></div>
-      <div class="ring" id="ring"></div>
-      <div class="aim-line" id="aimLine"></div>
+<audio id="successAudio" preload="auto">
+  <source src="https://cdn.jsdelivr.net/gh/faylynn/audio/success.wav" type="audio/wav">
+</audio>
 
-      <button class="float-btn back-btn" onclick="goHome()">返回</button>
-      <button class="float-btn reset-btn" onclick="resetRing()">重置</button>
-      <button class="float-btn mode-btn" onclick="switchMode()" id="modeBtn">萌新模式</button>
-      <button class="float-btn share-btn" onclick="doShare()">分享战绩</button>
-      <button class="float-btn collect-btn" onclick="openCollection()">我的收藏</button>
-    </div>
+<audio id="failAudio" preload="auto">
+  <source src="https://cdn.jsdelivr.net/gh/faylynn/audio/fail.wav" type="audio/wav">
+</audio>
 
-    <!-- 收藏册 -->
-    <div class="collection" id="collection">
-      <button class="float-btn back-btn" onclick="closeCollection()">返回</button>
-      <div style="font-size:20px; font-weight:bold; color:#ff69b4;">我的收藏</div>
-      <div class="collect-grid" id="collectGrid"></div>
-    </div>
+<div class="game-container">
+  <div class="home" id="home">
+    <div class="title">快乐套圈圈</div>
+    <button class="btn" onclick="startGame()">开始游戏</button>
+    <div class="tip">向后拉越远，扔得越远！</div>
+    <div class="tip">无广告·无限次·全家一起玩</div>
   </div>
 
-  <script>
-    // 奖品库
-    const prizes = [
-      "玉桂狗", "库洛米", "美乐蒂", "帕恰狗", "拉布布", "HelloKitty",
-      "阿奇", "天天", "毛毛", "大白鹅", "垂耳兔", "小仓鼠"
-    ];
-    let collected = [];
-    let isHardMode = false;
+  <div class="game" id="game">
+    <div class="ground"></div>
+    <div class="stage" id="stage"></div>
+    <div class="ring" id="ring"></div>
+    <div class="aim-line" id="aimLine"></div>
 
-    // DOM
-    const home = document.getElementById("home");
-    const game = document.getElementById("game");
-    const collection = document.getElementById("collection");
-    const ring = document.getElementById("ring");
-    const aimLine = document.getElementById("aimLine");
-    const stage = document.getElementById("stage");
-    const collectGrid = document.getElementById("collectGrid");
-    const modeBtn = document.getElementById("modeBtn");
+    <button class="float-btn back-btn" onclick="goHome()">返回</button>
+    <button class="float-btn reset-btn" onclick="resetRing()">重置</button>
+    <button class="float-btn mode-btn" onclick="switchMode()" id="modeBtn">萌新模式</button>
+    <button class="float-btn share-btn" onclick="doShare()">分享战绩</button>
+    <button class="float-btn collect-btn" onclick="openCollection()">我的收藏</button>
+  </div>
 
-    // 生成奖品展台
-    function buildStage() {
-      stage.innerHTML = "";
-      prizes.forEach(name => {
-        let div = document.createElement("div");
-        div.className = "prize";
-        div.innerText = name;
-        div.dataset.name = name;
-        stage.appendChild(div);
-      });
-    }
+  <div class="collection" id="collection">
+    <button class="float-btn back-btn" onclick="closeCollection()">返回</button>
+    <div style="font-size:20px; font-weight:bold; color:#ff69b4;">我的收藏</div>
+    <div class="collect-grid" id="collectGrid"></div>
+  </div>
+</div>
 
-    // 生成收藏册
-    function buildCollection() {
-      collectGrid.innerHTML = "";
-      prizes.forEach(name => {
-        let item = document.createElement("div");
-        item.className = "item";
-        if (collected.includes(name)) item.classList.add("active");
-        item.innerText = name;
-        collectGrid.appendChild(item);
-      });
-    }
+<script>
+  const prizes = [
+    "玉桂狗", "库洛米", "美乐蒂", "帕恰狗", "拉布布", "HelloKitty",
+    "阿奇", "天天", "毛毛", "大白鹅", "垂耳兔", "小仓鼠"
+  ];
+  let collected = [];
+  let isHardMode = false;
 
-    // 开始游戏
-    function startGame() {
-      home.style.display = "none";
-      game.style.display = "block";
-      buildStage();
-      buildCollection();
-    }
+  const successAudio = document.getElementById("successAudio");
+  const failAudio = document.getElementById("failAudio");
 
-    // 返回主页
-    function goHome() {
-      game.style.display = "none";
-      collection.style.display = "none";
-      home.style.display = "flex";
-    }
+  const home = document.getElementById("home");
+  const game = document.getElementById("game");
+  const collection = document.getElementById("collection");
+  const ring = document.getElementById("ring");
+  const aimLine = document.getElementById("aimLine");
+  const stage = document.getElementById("stage");
+  const collectGrid = document.getElementById("collectGrid");
+  const modeBtn = document.getElementById("modeBtn");
 
-    // 收藏册
-    function openCollection() {
-      game.style.display = "none";
-      collection.style.display = "block";
-      buildCollection();
-    }
-    function closeCollection() {
-      collection.style.display = "none";
-      game.style.display = "block";
-    }
+  function buildStage() {
+    stage.innerHTML = "";
+    prizes.forEach(name => {
+      let div = document.createElement("div");
+      div.className = "prize";
+      div.innerText = name;
+      div.dataset.name = name;
+      stage.appendChild(div);
+    });
+  }
 
-    // 模式切换
-    function switchMode() {
-      isHardMode = !isHardMode;
-      modeBtn.innerText = isHardMode ? "挑战模式" : "萌新模式";
-      ring.style.width = isHardMode ? "36px" : "50px";
-      ring.style.height = isHardMode ? "36px" : "50px";
-    }
+  function buildCollection() {
+    collectGrid.innerHTML = "";
+    prizes.forEach(name => {
+      let item = document.createElement("div");
+      item.className = "item";
+      if (collected.includes(name)) item.classList.add("active");
+      item.innerText = name;
+      collectGrid.appendChild(item);
+    });
+  }
 
-    // 分享（模拟）
-    function doShare() {
-      let count = collected.length;
-      alert(`我套中了 ${count} 个奖品！快来一起玩～`);
-    }
+  function startGame() {
+    home.style.display = "none";
+    game.style.display = "block";
+    buildStage();
+    buildCollection();
+  }
 
-    // 套圈控制
-    let startX = 0, startY = 0;
-    let dragging = false;
-    let ringLeft = window.innerWidth / 2 - 25;
-    let ringBottom = 120;
+  function goHome() {
+    game.style.display = "none";
+    collection.style.display = "none";
+    home.style.display = "flex";
+  }
 
-    // 触摸开始
-    document.addEventListener("touchstart", e => {
-      if (game.style.display !== "block") return;
-      dragging = true;
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-      aimLine.style.display = "block";
+  function openCollection() {
+    game.style.display = "none";
+    collection.style.display = "block";
+    buildCollection();
+  }
+
+  function closeCollection() {
+    collection.style.display = "none";
+    game.style.display = "block";
+  }
+
+  function switchMode() {
+    isHardMode = !isHardMode;
+    modeBtn.innerText = isHardMode ? "挑战模式" : "萌新模式";
+    ring.style.width = isHardMode ? "36px" : "50px";
+    ring.style.height = isHardMode ? "36px" : "50px";
+  }
+
+  function doShare() {
+    alert(`我套中了 ${collected.length} 个奖品！快来玩快乐套圈圈～`);
+  }
+
+  let startX = 0, startY = 0;
+  let dragging = false;
+
+  document.addEventListener("touchstart", e => {
+    if (game.style.display !== "block") return;
+    dragging = true;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    aimLine.style.display = "block";
+  });
+
+  document.addEventListener("touchmove", e => {
+    if (!dragging) return;
+    let x = e.touches[0].clientX;
+    let dx = x - startX;
+    let angle = dx * 0.3;
+    aimLine.style.transform = `rotate(${angle}deg)`;
+  });
+
+  document.addEventListener("touchend", async e => {
+    if (!dragging) return;
+    dragging = false;
+    aimLine.style.display = "none";
+
+    let endY = e.changedTouches[0].clientY;
+    let power = Math.min(500, Math.max(80, (startY - endY) * 2.5));
+    let angle = (e.changedTouches[0].clientX - startX) * 0.3;
+
+    ring.style.transition = "all 0.7s cubic-bezier(0.1, 0.7, 0.3, 1)";
+    ring.style.transform = `rotate(${angle}deg)`;
+    ring.style.bottom = `${120 + power}px`;
+    ring.style.left = `${window.innerWidth / 2 - (ring.offsetWidth / 2) + (e.changedTouches[0].clientX - startX) * 1.2}px`;
+
+    await sleep(700);
+    let hasHit = checkHit();
+    await sleep(800);
+    resetRing();
+  });
+
+  // 严格判定：只有圈完全包裹奖品才算套中
+  function checkHit() {
+    let r = ring.getBoundingClientRect();
+    let ringCenterX = r.left + r.width / 2;
+    let ringCenterY = r.top + r.height / 2;
+    let ringRadius = r.width / 2;
+    let hasHit = false;
+
+    document.querySelectorAll(".prize").forEach(el => {
+      let p = el.getBoundingClientRect();
+      let prizeCenterX = p.left + p.width / 2;
+      let prizeCenterY = p.top + p.height / 2;
+
+      let dx = prizeCenterX - ringCenterX;
+      let dy = prizeCenterY - ringCenterY;
+      let dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < ringRadius - 3) {
+        hasHit = true;
+        let name = el.dataset.name;
+        if (!collected.includes(name)) collected.push(name);
+        playSuccess();
+        alert("🎉 套中了：" + name);
+      }
     });
 
-    // 触摸移动
-    document.addEventListener("touchmove", e => {
-      if (!dragging) return;
-      let x = e.touches[0].clientX;
-      let y = e.touches[0].clientY;
-      let dx = x - startX;
-      let dy = y - startY;
-      let angle = dx * 0.3;
-      aimLine.style.transform = `rotate(${angle}deg)`;
-    });
-
-    // 投掷
-    document.addEventListener("touchend", async e => {
-      if (!dragging) return;
-      dragging = false;
-      aimLine.style.display = "none";
-
-      let endX = e.changedTouches[0].clientX;
-      let endY = e.changedTouches[0].clientY;
-      let power = Math.min(200, Math.max(60, startY - endY));
-      let angle = (endX - startX) * 0.3;
-
-      // 飞行动画
-      ring.style.transition = "all 0.6s cubic-bezier(0.2, 0.7, 0.3, 1)";
-      ring.style.transform = `rotate(${angle}deg)`;
-      ring.style.bottom = `${120 + power}px`;
-      ring.style.left = `${window.innerWidth / 2 - 25 + (endX - startX) * 0.8}px`;
-
-      await sleep(600);
-      checkHit();
-      await sleep(800);
-      resetRing();
-    });
-
-    // 碰撞判定
-    function checkHit() {
-      let ringRect = ring.getBoundingClientRect();
-      let all = document.querySelectorAll(".prize");
-      all.forEach(el => {
-        let r = el.getBoundingClientRect();
-        let cx = ringRect.left + ringRect.width / 2;
-        let cy = ringRect.top + ringRect.height / 2;
-        if (cx > r.left && cx < r.right && cy > r.top && cy < r.bottom) {
-          let name = el.dataset.name;
-          if (!collected.includes(name)) collected.push(name);
-          alert(`恭喜套中：${name}`);
-        }
-      });
+    if (!hasHit) {
+      playFail();
     }
+    return hasHit;
+  }
 
-    // 重置套圈
-    function resetRing() {
-      ring.style.transition = "none";
-      ring.style.transform = "rotate(0deg)";
-      ring.style.bottom = "120px";
-      ring.style.left = "calc(50% - 25px)";
-    }
+  function playSuccess() {
+    successAudio.currentTime = 0;
+    successAudio.play().catch(() => {});
+  }
 
-    function sleep(t) {
-      return new Promise(r => setTimeout(r, t));
-    }
-  </script>
+  function playFail() {
+    failAudio.currentTime = 0;
+    failAudio.play().catch(() => {});
+  }
+
+  function resetRing() {
+    ring.style.transition = "none";
+    ring.style.transform = "rotate(0deg)";
+    ring.style.bottom = "120px";
+    ring.style.left = "calc(50% - " + (ring.offsetWidth / 2) + "px)";
+  }
+
+  function sleep(t) {
+    return new Promise(r => setTimeout(r, t));
+  }
+</script>
 </body>
 </html>
