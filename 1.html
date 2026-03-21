@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>快乐套圈圈</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #fdf6f8;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .game-container {
+      width: 100vw;
+      height: 100vh;
+      max-width: 480px;
+      background: linear-gradient(to bottom, #f8efff, #e8f8ff);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 首页 */
+    .home {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .title {
+      font-size: 32px;
+      color: #ff69b4;
+      font-weight: bold;
+      text-shadow: 0 0 10px #fff;
+    }
+
+    .btn {
+      padding: 14px 30px;
+      background: #ff8fc6;
+      color: white;
+      border-radius: 50px;
+      font-size: 16px;
+      border: none;
+      box-shadow: 0 4px 10px #0001;
+    }
+
+    .tip {
+      font-size: 12px;
+      color: #666;
+      margin-top: 10px;
+    }
+
+    /* 游戏场景 */
+    .game {
+      width: 100%;
+      height: 100%;
+      display: none;
+      position: relative;
+    }
+
+    .ground {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 40%;
+      background: #b7e8a6;
+      border-top-left-radius: 50% 20px;
+      border-top-right-radius: 50% 20px;
+    }
+
+    .stage {
+      position: absolute;
+      bottom: 35%;
+      width: 100%;
+      height: 200px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 0 20px;
+    }
+
+    .prize {
+      width: 40px;
+      height: 50px;
+      background: #ffdae0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      text-align: center;
+      box-shadow: 0 2px 5px #0002;
+    }
+
+    /* 套圈 */
+    .ring {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #ff69b4;
+      border-radius: 50%;
+      position: absolute;
+      bottom: 120px;
+      left: calc(50% - 25px);
+      pointer-events: none;
+      transition: none;
+      z-index: 99;
+    }
+
+    /* 瞄准线 */
+    .aim-line {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      width: 2px;
+      height: 220px;
+      background: #ff69b466;
+      transform-origin: bottom center;
+      pointer-events: none;
+      display: none;
+    }
+
+    /* 收藏页 */
+    .collection {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      padding: 20px;
+      display: none;
+      overflow-y: auto;
+    }
+
+    .collect-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .item {
+      aspect-ratio: 1/1;
+      background: #f4f4f4;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .item.active {
+      background: #ffdae0;
+      color: #c44;
+      font-weight: bold;
+    }
+
+    /* 浮动按钮 */
+    .float-btn {
+      position: absolute;
+      z-index: 999;
+      padding: 8px 12px;
+      background: #ff8fc6;
+      color: white;
+      border-radius: 50px;
+      font-size: 12px;
+      border: none;
+    }
+
+    .back-btn {
+      top: 40px;
+      left: 20px;
+    }
+
+    .reset-btn {
+      bottom: 120px;
+      right: 20px;
+    }
+
+    .mode-btn {
+      top: 40px;
+      right: 20px;
+    }
+
+    .share-btn {
+      top: 90px;
+      right: 20px;
+    }
+
+    .collect-btn {
+      top: 140px;
+      right: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="game-container">
+    <!-- 首页 -->
+    <div class="home" id="home">
+      <div class="title">快乐套圈圈</div>
+      <button class="btn" onclick="startGame()">开始游戏</button>
+      <div class="tip">滑动控方向 · 向后拉力度 · 松手投掷</div>
+      <div class="tip">无广告 · 无限次 · 全家一起玩</div>
+    </div>
+
+    <!-- 游戏页 -->
+    <div class="game" id="game">
+      <div class="ground"></div>
+      <div class="stage" id="stage"></div>
+      <div class="ring" id="ring"></div>
+      <div class="aim-line" id="aimLine"></div>
+
+      <button class="float-btn back-btn" onclick="goHome()">返回</button>
+      <button class="float-btn reset-btn" onclick="resetRing()">重置</button>
+      <button class="float-btn mode-btn" onclick="switchMode()" id="modeBtn">萌新模式</button>
+      <button class="float-btn share-btn" onclick="doShare()">分享战绩</button>
+      <button class="float-btn collect-btn" onclick="openCollection()">我的收藏</button>
+    </div>
+
+    <!-- 收藏册 -->
+    <div class="collection" id="collection">
+      <button class="float-btn back-btn" onclick="closeCollection()">返回</button>
+      <div style="font-size:20px; font-weight:bold; color:#ff69b4;">我的收藏</div>
+      <div class="collect-grid" id="collectGrid"></div>
+    </div>
+  </div>
+
+  <script>
+    // 奖品库
+    const prizes = [
+      "玉桂狗", "库洛米", "美乐蒂", "帕恰狗", "拉布布", "HelloKitty",
+      "阿奇", "天天", "毛毛", "大白鹅", "垂耳兔", "小仓鼠"
+    ];
+    let collected = [];
+    let isHardMode = false;
+
+    // DOM
+    const home = document.getElementById("home");
+    const game = document.getElementById("game");
+    const collection = document.getElementById("collection");
+    const ring = document.getElementById("ring");
+    const aimLine = document.getElementById("aimLine");
+    const stage = document.getElementById("stage");
+    const collectGrid = document.getElementById("collectGrid");
+    const modeBtn = document.getElementById("modeBtn");
+
+    // 生成奖品展台
+    function buildStage() {
+      stage.innerHTML = "";
+      prizes.forEach(name => {
+        let div = document.createElement("div");
+        div.className = "prize";
+        div.innerText = name;
+        div.dataset.name = name;
+        stage.appendChild(div);
+      });
+    }
+
+    // 生成收藏册
+    function buildCollection() {
+      collectGrid.innerHTML = "";
+      prizes.forEach(name => {
+        let item = document.createElement("div");
+        item.className = "item";
+        if (collected.includes(name)) item.classList.add("active");
+        item.innerText = name;
+        collectGrid.appendChild(item);
+      });
+    }
+
+    // 开始游戏
+    function startGame() {
+      home.style.display = "none";
+      game.style.display = "block";
+      buildStage();
+      buildCollection();
+    }
+
+    // 返回主页
+    function goHome() {
+      game.style.display = "none";
+      collection.style.display = "none";
+      home.style.display = "flex";
+    }
+
+    // 收藏册
+    function openCollection() {
+      game.style.display = "none";
+      collection.style.display = "block";
+      buildCollection();
+    }
+    function closeCollection() {
+      collection.style.display = "none";
+      game.style.display = "block";
+    }
+
+    // 模式切换
+    function switchMode() {
+      isHardMode = !isHardMode;
+      modeBtn.innerText = isHardMode ? "挑战模式" : "萌新模式";
+      ring.style.width = isHardMode ? "36px" : "50px";
+      ring.style.height = isHardMode ? "36px" : "50px";
+    }
+
+    // 分享（模拟）
+    function doShare() {
+      let count = collected.length;
+      alert(`我套中了 ${count} 个奖品！快来一起玩～`);
+    }
+
+    // 套圈控制
+    let startX = 0, startY = 0;
+    let dragging = false;
+    let ringLeft = window.innerWidth / 2 - 25;
+    let ringBottom = 120;
+
+    // 触摸开始
+    document.addEventListener("touchstart", e => {
+      if (game.style.display !== "block") return;
+      dragging = true;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      aimLine.style.display = "block";
+    });
+
+    // 触摸移动
+    document.addEventListener("touchmove", e => {
+      if (!dragging) return;
+      let x = e.touches[0].clientX;
+      let y = e.touches[0].clientY;
+      let dx = x - startX;
+      let dy = y - startY;
+      let angle = dx * 0.3;
+      aimLine.style.transform = `rotate(${angle}deg)`;
+    });
+
+    // 投掷
+    document.addEventListener("touchend", async e => {
+      if (!dragging) return;
+      dragging = false;
+      aimLine.style.display = "none";
+
+      let endX = e.changedTouches[0].clientX;
+      let endY = e.changedTouches[0].clientY;
+      let power = Math.min(200, Math.max(60, startY - endY));
+      let angle = (endX - startX) * 0.3;
+
+      // 飞行动画
+      ring.style.transition = "all 0.6s cubic-bezier(0.2, 0.7, 0.3, 1)";
+      ring.style.transform = `rotate(${angle}deg)`;
+      ring.style.bottom = `${120 + power}px`;
+      ring.style.left = `${window.innerWidth / 2 - 25 + (endX - startX) * 0.8}px`;
+
+      await sleep(600);
+      checkHit();
+      await sleep(800);
+      resetRing();
+    });
+
+    // 碰撞判定
+    function checkHit() {
+      let ringRect = ring.getBoundingClientRect();
+      let all = document.querySelectorAll(".prize");
+      all.forEach(el => {
+        let r = el.getBoundingClientRect();
+        let cx = ringRect.left + ringRect.width / 2;
+        let cy = ringRect.top + ringRect.height / 2;
+        if (cx > r.left && cx < r.right && cy > r.top && cy < r.bottom) {
+          let name = el.dataset.name;
+          if (!collected.includes(name)) collected.push(name);
+          alert(`恭喜套中：${name}`);
+        }
+      });
+    }
+
+    // 重置套圈
+    function resetRing() {
+      ring.style.transition = "none";
+      ring.style.transform = "rotate(0deg)";
+      ring.style.bottom = "120px";
+      ring.style.left = "calc(50% - 25px)";
+    }
+
+    function sleep(t) {
+      return new Promise(r => setTimeout(r, t));
+    }
+  </script>
+</body>
+</html>
